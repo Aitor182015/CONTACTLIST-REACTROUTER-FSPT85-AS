@@ -1,0 +1,15 @@
+.mb-3 {
+    width: 90%;
+}
+
+body {
+    padding-left: 30px;
+    padding-top: 20px;
+}
+
+img {
+    width: 200px; 
+    height: 200px; 
+    border-radius: 50%;
+}
+

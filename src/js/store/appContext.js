@@ -45,4 +45,4 @@ const injectContext = PassedComponent => {
 	return StoreWrapper;
 };
 
-export default injectContext;
+export default injectContext
