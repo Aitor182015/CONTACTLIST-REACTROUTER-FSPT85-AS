@@ -10,6 +10,15 @@ export const Home = () => {
     const [showModal, setShowModal] = useState(false);
     const [selectedContact, setSelectedContact] = useState(null);
 
+    // Estado para el modal de edición
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [editFormData, setEditFormData] = useState({
+        name: "",
+        email: "",
+        phone: "",
+        address: "",
+    });
+
     useEffect(() => {
         actions.getContacts(); // Obtiene los contactos al cargar la página
     }, []);
@@ -23,12 +32,32 @@ export const Home = () => {
         setShowModal(true); // Muestra el modal
     };
 
-    const handleDeleteContact = () => {
-        if (selectedContact) {
-            actions.removeContact(selectedContact); // Elimina el contacto seleccionado
-        }
-        setShowModal(false); // Oculta el modal
+    const handleShowEditModal = (contact) => {
+        setEditFormData(contact); // Carga los datos del contacto en el formulario
+        setShowEditModal(true); // Muestra el modal de edición
     };
+
+    const handleEditFormChange = (e) => {
+        const { name, value } = e.target;
+        setEditFormData({
+            ...editFormData,
+            [name]: value, // Actualiza el estado del formulario según el campo
+        });
+    };
+
+    const handleSaveEdit = () => {
+        actions.updateContact(editFormData); // Llama a la acción para actualizar el contacto
+        setShowEditModal(false); // Oculta el modal
+    };
+
+    const handleDeleteContact = async () => {
+        if (selectedContact) {
+            await actions.removeContact(selectedContact); // Llama a la función para eliminar el contacto
+            setShowModal(false); // Cierra el modal
+            setSelectedContact(null); // Limpia el contacto seleccionado
+        }
+    };
+    
 
     return (
         <div className="container mt-4">
@@ -60,12 +89,19 @@ export const Home = () => {
                             </div>
                             <div className="col-md-8">
                                 <div className="card-body">
-                                    {/* Botón "X" para eliminar el contacto */}
-                                    <span
-                                        className="btn-close position-absolute top-0 end-0 m-2"
-                                        onClick={() => handleShowModal(item.id)} // Abre el modal con el ID del contacto
-                                    ></span>
+                                    <div className="position-absolute top-0 end-0 m-2 d-flex align-items-center">
+                                        {/* Ícono del lápiz */}
+                                        <span className="me-2" onClick={() => handleShowEditModal(item)}>
+                                            <i className="fa-solid fa-pen" style={{ cursor: "pointer" }}></i>
+                                        </span>
+                                        {/* Botón "X" para eliminar el contacto */}
+                                        <span
+                                            className="btn-close"
+                                            onClick={() => handleShowModal(item.id)} // Abre el modal con el ID del contacto
+                                        ></span>
+                                    </div>
 
+                                    {/* Contenido de la tarjeta */}
                                     <h5 className="card-title">{item.name || "No Name"}</h5>
                                     <p className="card-text">{item.address || "No Address"}</p>
                                     <p className="card-text">{item.phone || "No Phone"}</p>
@@ -79,7 +115,7 @@ export const Home = () => {
                 <p className="text-center">No contacts available. Please add a new contact.</p>
             )}
 
-            {/* Modal */}
+            {/* Modal de confirmación de eliminación */}
             {showModal && (
                 <div className="modal fade show" style={{ display: "block" }} tabIndex="-1">
                     <div className="modal-dialog">
@@ -109,6 +145,84 @@ export const Home = () => {
                                     onClick={handleDeleteContact}
                                 >
                                     Delete
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal de edición */}
+            {showEditModal && (
+                <div className="modal fade show" style={{ display: "block" }} tabIndex="-1">
+                    <div className="modal-dialog">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h5 className="modal-title">Edit Contact</h5>
+                                <button
+                                    type="button"
+                                    className="btn-close"
+                                    onClick={() => setShowEditModal(false)}
+                                ></button>
+                            </div>
+                            <div className="modal-body">
+                                <form>
+                                    <div className="mb-3">
+                                        <label className="form-label">Name</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            name="name"
+                                            value={editFormData.name}
+                                            onChange={handleEditFormChange}
+                                        />
+                                    </div>
+                                    <div className="mb-3">
+                                        <label className="form-label">Email</label>
+                                        <input
+                                            type="email"
+                                            className="form-control"
+                                            name="email"
+                                            value={editFormData.email}
+                                            onChange={handleEditFormChange}
+                                        />
+                                    </div>
+                                    <div className="mb-3">
+                                        <label className="form-label">Phone</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            name="phone"
+                                            value={editFormData.phone}
+                                            onChange={handleEditFormChange}
+                                        />
+                                    </div>
+                                    <div className="mb-3">
+                                        <label className="form-label">Address</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            name="address"
+                                            value={editFormData.address}
+                                            onChange={handleEditFormChange}
+                                        />
+                                    </div>
+                                </form>
+                            </div>
+                            <div className="modal-footer">
+                                <button
+                                    type="button"
+                                    className="btn btn-secondary"
+                                    onClick={() => setShowEditModal(false)}
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="button"
+                                    className="btn btn-primary"
+                                    onClick={handleSaveEdit}
+                                >
+                                    Save
                                 </button>
                             </div>
                         </div>

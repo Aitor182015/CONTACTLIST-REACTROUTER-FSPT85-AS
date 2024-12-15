@@ -88,6 +88,43 @@ const getState = ({ getStore, getActions, setStore }) => {
                     console.log("Error al eliminar contacto:", error);
                 }
             },
+            /* funcion para actualizar un contacto en la api */
+updateContact: async (contact) => {
+    try {
+        const { id, ...contactData } = contact; // Extrae el ID y los datos a actualizar del contacto
+        let response = await fetch(
+            `https://playground.4geeks.com/contact/agendas/aitorsantos/contacts/${id}`,
+            {
+                method: "PUT",
+                body: JSON.stringify(contactData), // Solo envía los datos que quieres actualizar
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            }
+        );
+
+        if (!response.ok) {
+            console.log(`Error al actualizar contacto, código de estado: ${response.status}`);
+            return false;
+        }
+
+        const updatedContact = await response.json();
+        console.log("Contacto actualizado exitosamente:", updatedContact);
+
+        // Actualiza el contacto en el store
+        const store = getStore();
+        const updatedContacts = store.contacts.map((c) =>
+            c.id === id ? updatedContact : c // Reemplaza el contacto actualizado en la lista
+        );
+
+        setStore({ contacts: updatedContacts }); // Guarda los cambios en el store
+        return true;
+    } catch (error) {
+        console.log("Error al actualizar contacto:", error);
+        return false;
+    }
+},
+
         }
     };
 };
